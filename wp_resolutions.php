@@ -135,9 +135,16 @@ function wprxr_htaccess ()
 	$includes = explode("\n", $wprxr_include_paths);
     
 	$new_htaccess = "# WP Resolutions\n<IfModule mod_rewrite.c>\nRewriteEngine On\n\n# Watch directories:";
+	
+	$i = 0;
+	$length = count($includes) - 1;
 
 	foreach ( $includes as $include )
-		$new_htaccess .= "\nRewriteCond %{REQUEST_URI} $include";
+	{
+		if ( $i != $length ) $new_htaccess .= "\nRewriteCond %{REQUEST_URI} " . trim($include) . " [OR]";
+		else if ( $i == $length ) $new_htaccess .= "\nRewriteCond %{REQUEST_URI} $include";
+		$i++;
+	}
 
 	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ $theme_directory /adaptive-images.php\n</IfModule>\n# END WP Resolutions\n";
 	
