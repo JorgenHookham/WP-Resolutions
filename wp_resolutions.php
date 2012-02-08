@@ -144,8 +144,7 @@ function wprxr_htaccess ()
 		$i++;
 	}
 
-	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ $theme_directory /adaptive-images.php\n</IfModule>\n# END WP Resolutions\n";
-	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ $theme_directory /adaptive-images.php\n\n# END WP Resolutions\n";
+	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ $theme_directory/adaptive-images.php\n</IfModule>\n# END WP Resolutions\n";
 	
 	return $new_htaccess;
 }
