@@ -25,10 +25,6 @@ array(  "type" => "close")
 
 );
 
-$server_path = explode('wp-content', $theme_directory);
-$theme_directory = dirname(__FILE__);
-$theme_directory = str_replace($server_path[0], '', $theme_directory);
-
 
 
 // Javascript cookie needs to be created before any image requests (including css)
@@ -130,6 +126,8 @@ function wprxr_deactivate()
 // This function returns the .htaccess rewrite block
 function wprxr_htaccess ()
 {
+	$theme_directory = "/".trim(str_replace(str_replace("\\", "/", $_SERVER["DOCUMENT_ROOT"]), '', str_replace("\\", "/", dirname(__FILE__))), "/");
+
 	$wprxr_include_paths = get_settings('wprxr_include_paths');
 	
 	$includes = explode("\n", $wprxr_include_paths);
@@ -147,6 +145,7 @@ function wprxr_htaccess ()
 	}
 
 	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ $theme_directory /adaptive-images.php\n</IfModule>\n# END WP Resolutions\n";
+	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ $theme_directory /adaptive-images.php\n\n# END WP Resolutions\n";
 	
 	return $new_htaccess;
 }
