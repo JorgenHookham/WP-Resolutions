@@ -91,11 +91,6 @@ function wprxr_activate()
 		die("<div id=\"message\" class=\"error\"><strong>The permissions on your .htaccess file restrict automatic setup.</strong> To fix this you can: <br> 1. Change permissions on the .htaccess file in your WordPress root directory to allow write access, or <br> 2. Manually add this rewrite block to your .htaccess file: <br><br> <pre>$new_htaccess</pre></div>");
 	}
 	
-	if ( !is_dir(get_home_path() . 'ai-cache'))
-	{
-		@mkdir(get_home_path() . 'ai-cache') or die("<div id=\"message\" class=\"error\"><strong>Unable to create cache folder.</strong> To fix this you can: <br> 1. Update permissions for the WordPress root directory to allow write access, or <br> 2. Manually create the directory 'ai-cache' within your WordPress root directory and give it write permissions.</div>");
-	}
-	
 	$old_htaccess = file_get_contents(get_home_path() . '.htaccess');
 		
 	if ( preg_match('/# WP Resolutions.*# END WP Resolutions\n/s', $old_htaccess) )
