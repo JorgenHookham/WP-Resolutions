@@ -9,11 +9,24 @@ Author URI: http://jorgen.co
 License: GPL
 */
 
-$pluginname = "WP Resolutions";
-$shortname = "wprxr"; 
-$options = array (
+$wprxr_pluginname = "WP Resolutions";
+$wprxr_shortname = "wprxr";
+$wprxr_ai_path = plugin_dir_path(__FILE__) . "adaptive-images.php";
+$wprxr_options = array (
 
 array(  "type" => "open"),
+
+/**
+ * This option provides the possibility to edit adaptive-images.php config section directly from plugin settings page.
+ * Make sure adaptive-images.php has write permissions
+ * This option is not saved in WordPress database.
+ **/
+array(	"name" => "Adaptive-images config",
+		"desc" => "Edit config section of adaptive-images.php",
+		"id" => $shortname . "_ai_config",
+		"type" => "textarea",
+		"std" => wprxr_get_ai_config(),
+		"handler" => "wprxr_set_ai_config" ),
 
 array(	"name" => "Watch paths",
 		"desc" => "Enter the paths that you want Resolutions to watch. Put each path on a new line (separate paths with a return.)",
@@ -33,28 +46,71 @@ function wprxr_js()
 	echo "<script>document.cookie='resolution='+Math.max(screen.width,screen.height)+'; path=/';</script>";
 }
 
+/**
+ * This function returns config section of adaptive images php file
+ *
+ * @return string Config Section of adaptive-images.php
+ * @param string $context If set, uses this parameter instead of file contents
+ * @author Karlis Bikis 
+ **/
+function wprxr_get_ai_config( $context = "" )
+{
+	if( !$context )
+	{
+		global $wprxr_ai_path;
+		$context = file_get_contents( $wprxr_ai_path );
+	}
+	preg_match("%/\* ?CONFIG -+ ?\*/\r?\n?(.*)\r?\n?/\* ?END CONFIG%ms", $context, $matches );
+	return $matches[1];
+}
+
+/**
+ * This function saves new config of adaptive images php file
+ *
+ * @return void
+ * @param string $val New Config
+ * @author Karlis Bikis 
+ **/
+function wprxr_set_ai_config( $val )
+{
+	// Get current config
+	global $wprxr_ai_path;
+	$everything = file_get_contents( $wprxr_ai_path );
+	$currentConfig = wprxr_get_ai_config( $everything );
+
+	// Get file with new config
+	$newFile = str_replace( $currentConfig, "\n" . stripslashes($val), $everything );
+
+	// Save new file
+	file_put_contents( $wprxr_ai_path, $newFile ) or die("Cannot write to adaptive-images.php. Check file permissions.");
+}
 
 
 function wprxr_add_page()
 {
 
-    global $pluginname, $shortname, $options;
+    global $wprxr_options, $wprxr_pluginname, $wprxr_shortname;
+	$options = $wprxr_options;
+	$pluginname = $wprxr_pluginname;
+	$shortname = $wprxr_shortname;
 
     if ( $_GET['page'] == 'wprxr' )
     {
         if ( 'save' == $_REQUEST['action'] )
         {
-			
-			// Redundant?
-            foreach ($options as $value)
-            {
-                update_option( $value['id'], $_REQUEST[ $value['id'] ] );
-			}
-
 		    foreach ($options as $value)
 		    {
 		        if( isset( $_REQUEST[ $value['id'] ] ) )
 		        {
+					// Check if option has custom data handler
+					if( isset( $value['handler'] ) && is_callable( $value['handler'] ) )
+					{
+						$handler = $value['handler'];
+						$handler( $_REQUEST[ $value['id'] ] );
+						continue;
+					}
+
+			    	// Use update_option if no option handler specified
 		        	update_option( $value['id'], $_REQUEST[ $value['id'] ]  );
 		        }
 		        
@@ -121,6 +177,8 @@ function wprxr_deactivate()
 // This function returns the .htaccess rewrite block
 function wprxr_htaccess ()
 {
+	global $wprxr_ai_path;
+
 	$theme_directory = "/".trim(str_replace(str_replace("\\", "/", $_SERVER["DOCUMENT_ROOT"]), '', str_replace("\\", "/", dirname(__FILE__))), "/");
 
 	$wprxr_include_paths = get_settings('wprxr_include_paths');
@@ -139,7 +197,7 @@ function wprxr_htaccess ()
 		$i++;
 	}
 
-	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ wp-content/plugins/wp-resolutions/adaptive-images.php\n</IfModule>\n# END WP Resolutions\n";
+	$new_htaccess .= "\n\nRewriteRule \.(?:jpe?g|gif|png)$ " . $wprxr_ai_path . "\n</IfModule>\n# END WP Resolutions\n";
 	
 	return $new_htaccess;
 }
@@ -150,7 +208,10 @@ function wprxr_htaccess ()
 function wprxr_page()
 {
 
-	global $options, $pluginname, $shortname;
+	global $wprxr_options, $wprxr_pluginname, $wprxr_shortname;
+	$options = $wprxr_options;
+	$pluginname = $wprxr_pluginname;
+	$shortname = $wprxr_shortname;
 	
 	$new_htaccess = wprxr_htaccess();
 
