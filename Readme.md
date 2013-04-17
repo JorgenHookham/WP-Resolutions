@@ -28,11 +28,7 @@ It is a one-click WordPress implementation of Matt Wilcox’s Adaptive-Images pl
 ## How It Works ##
 When a device lands on a resolutions-enabled site, JavaScript creates a cookie that stores the device’s resolution. Then, `.htaccess` redirects image requests to `adaptive-images.php`, which reads the cookie and creates/caches appropriately-sized versions of images before sending them to the viewer.
 
-For news, support, and comments, follow [@wpresolutions](http://twitter.com/wpresolutions). Also available on [GitHub](https://github.com/JorgenScott/WP-Resolutions).
-
 ## Installation ##
 
 1. Install and activate the plugin from your WordPress dashboard.
 2. Resolutions is now watching all of the image files in your uploads directory.
-
-For news, support, and comments, follow [@wpresolutions](http://twitter.com/wpresolutions). Also available on [GitHub](https://github.com/JorgenScott/WP-Resolutions).
